@@ -292,7 +292,7 @@ MyExampleHandler::MyExampleHandler(QObject* parent)
     : QObject(parent)
 {
     // 设置属性，让 MCPAutoServer 能够找到这个处理器
-    setProperty("MPCServerHandlerName", "MyExampleHandler");
+    setProperty("MPCToolHandlerName", "MyExampleHandler");
 }
 
 QJsonObject MyExampleHandler::calculateOperation(double a, double b, const QString& operation)
@@ -443,7 +443,7 @@ MCPServerConfig/
 | `name` | string | 是 | 工具名称（唯一标识符，建议使用小写字母和下划线） |
 | `title` | string | 是 | 工具显示标题 |
 | `description` | string | 是 | 工具功能描述 |
-| `execHandler` | string | 是 | 处理器对象名称（必须与代码中 QObject 的 `objectName` 或 `MPCServerHandlerName` 属性匹配） |
+| `execHandler` | string | 是 | 处理器对象名称（必须与代码中 QObject 的 `objectName` 或 `MPCToolHandlerName` 属性匹配） |
 | `execMethod` | string | 是 | 处理方法名（处理器类中的 `public slots` 方法名） |
 | `inputSchema` | object | 是 | 输入参数 JSON Schema（定义工具输入参数的结构和类型） |
 | `outputSchema` | object | 是 | 输出结果 JSON Schema（定义工具返回值的结构和类型） |
@@ -870,9 +870,9 @@ int main(int argc, char *argv[])
 - ✅ 这样 `MCPHandlerResolver` 才能通过 `qApp->findChildren<QObject*>()` 找到它们
 - ❌ 如果处理器对象没有父对象，或者父对象不是 `qApp`，将无法被找到
 
-#### 2. MPCServerHandlerName - 工具处理器属性
+#### 2. MPCToolHandlerName - 工具处理器属性
 
-**`MPCServerHandlerName`** 是一个自定义的 Qt 属性，用于标识工具处理器对象。
+**`MPCToolHandlerName`** 是一个自定义的 Qt 属性，用于标识工具处理器对象。
 
 **作用**：
 - 在配置文件的 `execHandler` 字段中指定处理器名称
@@ -887,8 +887,8 @@ int main(int argc, char *argv[])
 MyExampleHandler::MyExampleHandler(QObject* parent)
     : QObject(parent)
 {
-    // 设置 MPCServerHandlerName 属性
-    setProperty("MPCServerHandlerName", "MyExampleHandler");
+    // 设置 MPCToolHandlerName 属性
+    setProperty("MPCToolHandlerName", "MyExampleHandler");
 }
 ```
 
@@ -900,7 +900,7 @@ int main(int argc, char *argv[])
     
     MyExampleHandler* pHandler = new MyExampleHandler(qApp);
     // 设置属性
-    pHandler->setProperty("MPCServerHandlerName", "MyExampleHandler");
+    pHandler->setProperty("MPCToolHandlerName", "MyExampleHandler");
     // 同时设置 objectName（推荐，作为备用标识）
     pHandler->setObjectName("MyExampleHandler");
     
@@ -922,11 +922,11 @@ int main(int argc, char *argv[])
 **查找优先级**：
 `MCPHandlerResolver` 按以下顺序查找处理器：
 1. 首先检查 `objectName` 是否匹配
-2. 然后检查 `MPCServerHandlerName` 属性是否匹配
+2. 然后检查 `MPCToolHandlerName` 属性是否匹配
 3. 如果找到匹配的对象，返回该对象
 
 **最佳实践**：
-- ✅ **同时设置** `MPCServerHandlerName` 属性和 `objectName`，确保双重保障
+- ✅ **同时设置** `MPCToolHandlerName` 属性和 `objectName`，确保双重保障
 - ✅ 属性值应与配置文件中的 `execHandler` 完全一致（区分大小写）
 - ✅ 属性值应使用有意义的名称，便于识别和管理
 
@@ -1030,7 +1030,7 @@ signals:
    ↓
 2. 对每个对象检查：
    ├─ objectName 是否匹配？
-   ├─ MPCServerHandlerName 属性是否匹配？（工具处理器）
+   ├─ MPCToolHandlerName 属性是否匹配？（工具处理器）
    └─ MCPResourceHandlerName 属性是否匹配？（资源处理器）
    ↓
 3. 找到匹配的对象，返回映射表
@@ -1098,18 +1098,18 @@ MyExampleHandler* pHandler = new MyExampleHandler(qApp);  // 太晚了！
 **错误2：属性值不匹配**
 ```
 配置文件：execHandler: "MyExampleHandler"
-代码中：setProperty("MPCServerHandlerName", "MyHandler")  // 不匹配！
+代码中：setProperty("MPCToolHandlerName", "MyHandler")  // 不匹配！
 ```
 
 **解决方案**：
 确保属性值与配置文件完全一致（区分大小写）：
 ```cpp
 // ✅ 正确
-setProperty("MPCServerHandlerName", "MyExampleHandler");
+setProperty("MPCToolHandlerName", "MyExampleHandler");
 
 // ❌ 错误
-setProperty("MPCServerHandlerName", "MyHandler");
-setProperty("MPCServerHandlerName", "myexamplehandler");  // 大小写不匹配
+setProperty("MPCToolHandlerName", "MyHandler");
+setProperty("MPCToolHandlerName", "myexamplehandler");  // 大小写不匹配
 ```
 
 **错误3：忘记设置父对象**
@@ -1127,7 +1127,7 @@ MyExampleHandler* pHandler = new MyExampleHandler(qApp);
 
 - [ ] 处理器对象继承自 `QObject`
 - [ ] 使用 `qApp`（或 `QCoreApplication` 实例）作为父对象
-- [ ] 设置了 `MPCServerHandlerName` 属性（工具处理器）或 `MCPResourceHandlerName` 属性（资源处理器）
+- [ ] 设置了 `MPCToolHandlerName` 属性（工具处理器）或 `MCPResourceHandlerName` 属性（资源处理器）
 - [ ] 设置了 `objectName`（推荐，作为备用标识）
 - [ ] 属性值与配置文件中的 `execHandler` 或 `handlerName` 完全匹配
 - [ ] 在 `StartAutoMCPServer()` **之前**创建处理器对象

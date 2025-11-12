@@ -173,6 +173,10 @@ QSharedPointer<MCPServerMessage> MCPRequestDispatcher::syncHandleToolsCall(const
         //https://modelcontextprotocol.io/docs/learn/architecture
         //https://modelcontextprotocol.io/specification/2025-06-18/server/tools#structured-content
         QJsonObject result = m_pServer->getToolService()->callTool(strToolName, jsonCallArguments);
+        if (result.contains("error"))
+        {
+            return QSharedPointer<MCPServerErrorResponse>::create(pContext, result);
+        }
         return QSharedPointer<MCPServerMessage>::create(pContext, result);
     }
     catch (const MCPError& error)

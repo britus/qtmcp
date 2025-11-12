@@ -130,6 +130,7 @@ MCPServerErrorResponse::MCPServerErrorResponse(const QSharedPointer<MCPContext>&
 	};
 }
 
+
 QByteArray MCPServerErrorResponse::toData()
 {
     auto data = m_rpcValue.isArray()
@@ -148,4 +149,18 @@ MCPServerErrorResponse::MCPServerErrorResponse(const QSharedPointer<MCPContext>&
         {"id", pRpcRequest->getMethodId()},
         {"error", error.toJson()}
     };
+}
+
+
+MCPServerErrorResponse::MCPServerErrorResponse(const QSharedPointer<MCPContext>& pContext, const QJsonObject& error)
+	: MCPServerMessage(pContext)
+{
+	auto pRpcRequest = pContext->getClientMessage().staticCast<MCPClientMessage>();
+
+	m_rpcValue = QJsonObject{
+		{"jsonrpc", "2.0"},
+		{"id", pRpcRequest->getMethodId()},
+		{"error", error.value("error")}
+	};
+
 }

@@ -18,8 +18,8 @@ int main(int argc, char *argv[])
     app.setApplicationVersion("1.0.0");
 
     // 创建Handler对象（用于处理工具调用）
-    // Handler 必须创建，MCPHandlerResolver 会通过 objectName 或 "MPCServerHandlerName" 属性找到它
-    // MyExampleHandler 构造函数中已设置 "MPCServerHandlerName" 属性
+    // Handler 必须创建，MCPHandlerResolver 会通过 objectName 或 "MPCToolHandlerName" 属性找到它
+    // MyExampleHandler 构造函数中已设置 "MPCToolHandlerName" 属性
     MyExampleHandler* pHandler = new MyExampleHandler(qApp);
     // 同时设置 objectName 以确保能够被找到
     pHandler->setObjectName("MyExampleHandler");

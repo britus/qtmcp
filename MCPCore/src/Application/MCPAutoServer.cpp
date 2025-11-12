@@ -94,9 +94,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReason, LPVOID lpReserved)
 	{
 	case DLL_PROCESS_ATTACH:
 		// 增加模块引用计数
-		GetModuleHandleEx(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS |
-			GET_MODULE_HANDLE_EX_FLAG_PIN,
-			(LPCTSTR)hModule, &hModule);
+		//GetModuleHandleEx(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_PIN, (LPCTSTR)hModule, &hModule);
 		break;
 	}
 	return TRUE;

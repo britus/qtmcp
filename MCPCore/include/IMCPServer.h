@@ -151,5 +151,5 @@ protected:
 
 
 extern "C" MCPCORE_EXPORT void __stdcall  StartAutoMCPServer();
-extern "C" MCPCORE_EXPORT void __stdcall  LoadAutoMCPServerTool(const char* szToolConfigFile);
+extern "C" MCPCORE_EXPORT void __stdcall  FlushAutoMCPServerTool(const char* szToolConfigFile);
 extern "C" MCPCORE_EXPORT void __stdcall  StopAutoMCPServer();

@@ -71,9 +71,9 @@ target_include_directories(
     "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/3rdparty/>"
 )
 
-find_package(Qt5 COMPONENTS Core Network Concurrent REQUIRED)
+find_package(Qt5 COMPONENTS Core Network Concurrent Widgets REQUIRED)
 target_link_libraries(${LIBRARY_TARGET_NAME}
-    PRIVATE Qt5::Core Qt5::Network Qt5::Concurrent
+    PRIVATE Qt5::Core Qt5::Network Qt5::Concurrent Qt5::Widgets
     PRIVATE ${PROJECT_NAME}::llhttp
     PRIVATE ${PROJECT_NAME}::json-schema-validator
 )

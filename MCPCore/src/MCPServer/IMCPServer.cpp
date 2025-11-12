@@ -43,7 +43,7 @@ void StartAutoMCPServer()
 {
 	autoServer.performStart();
 }
-void LoadAutoMCPServerTool(const char* szToolConfigFile)
+void FlushAutoMCPServerTool(const char* szToolConfigFile)
 {
 	auto strConfigFile = QString::fromUtf8(szToolConfigFile);
 	autoServer.loadTool(strConfigFile);

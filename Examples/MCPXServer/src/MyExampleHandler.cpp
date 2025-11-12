@@ -15,7 +15,7 @@
 MyExampleHandler::MyExampleHandler(QObject* parent)
     : QObject(parent)
 {
-	setProperty("MPCServerHandlerName", "MyExampleHandler");
+	setProperty("MPCToolHandlerName", "MyExampleHandler");
 }
 
 QJsonObject MyExampleHandler::calculateOperation(double a, double b, const QString& operation)

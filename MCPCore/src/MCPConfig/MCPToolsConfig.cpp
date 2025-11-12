@@ -12,6 +12,7 @@
 #include <QJsonDocument>
 #include <QFile>
 #include <QDir>
+#include <QDirIterator>
 
 // ============================================================================
 // MCPToolConfig 实现
@@ -126,14 +127,12 @@ int MCPToolsConfig::loadFromDirectory(const QString& strDirPath)
     
     m_listToolConfigs.clear();
     
-    // 查找所有.json文件
-    QStringList filters;
-    filters << "*.json";
-    QStringList configFiles = dir.entryList(filters, QDir::Files);
+    // 递归查找所有.json文件（包括所有层级的子目录，递归遍历）
+    QDirIterator it(strDirPath, QStringList() << "*.json", QDir::Files, QDirIterator::Subdirectories);
     
-    for (const QString& fileName : configFiles)
+    while (it.hasNext())
     {
-        QString fullPath = dir.absoluteFilePath(fileName);
+        QString fullPath = it.next();
         
         QFile file(fullPath);
         if (!file.open(QIODevice::ReadOnly))

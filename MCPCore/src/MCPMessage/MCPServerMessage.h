@@ -55,6 +55,10 @@ public:
 	// 新增接受MCPError对象的构造函数
 	MCPServerErrorResponse(const QSharedPointer<MCPContext>& pContext, const MCPError& error);
 
+
+	// 新增接受MCPError对象的构造函数
+	MCPServerErrorResponse(const QSharedPointer<MCPContext>& pContext, const QJsonObject& error);
+
 public:
 	QByteArray toData() override;
 private:

@@ -70,35 +70,18 @@ QJsonArray MCPToolService::list() const
 
 bool MCPToolService::addFromJson(const QJsonObject& jsonTool, QObject* pSearchRoot)
 {
-    return MCPInvokeHelper::syncInvokeReturn(this, [this, jsonTool, pSearchRoot]()
+    return MCPInvokeHelper::syncInvokeReturn(this, [this, jsonTool, pSearchRoot]() -> bool
     {
         // 将JSON对象转换为MCPToolConfig
         MCPToolConfig toolConfig = MCPToolConfig::fromJson(jsonTool);
-        
-        // 如果提供了pSearchRoot，先解析handlers；否则传递空map，让addFromConfig从qApp搜索
-        QMap<QString, QObject*> dictHandlers;
-        if (pSearchRoot)
-        {
-            dictHandlers = MCPHandlerResolver::resolveHandlers(pSearchRoot);
-        }
-        
-        return addFromConfig(toolConfig, dictHandlers);
+        return addFromConfig(toolConfig, MCPHandlerResolver::resolveHandlers(pSearchRoot));
     });
 }
 
 bool MCPToolService::addFromConfig(const MCPToolConfig& toolConfig, const QMap<QString, QObject*>& dictHandlers)
 {
     // 从dictHandlers映射表中查找Handler，如果dictHandlers为空则从qApp搜索
-    QObject* pHandler = nullptr;
-    if (!dictHandlers.isEmpty())
-    {
-        pHandler = dictHandlers.value(toolConfig.strExecHandler, nullptr);
-    }
-    else
-    {
-        pHandler = MCPHandlerResolver::findHandler(toolConfig.strExecHandler, nullptr);
-    }
-    
+    QObject* pHandler = dictHandlers.value(toolConfig.strExecHandler, nullptr);
     if (pHandler == nullptr)
     {
         MCP_TOOLS_LOG_WARNING() << "MCPToolService: 工具配置的Handler未找到:" << toolConfig.strExecHandler

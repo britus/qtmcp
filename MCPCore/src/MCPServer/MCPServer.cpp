@@ -109,8 +109,6 @@ void MCPServer::stop()
 		m_pThread->quit();
 		m_pThread->wait();
 		setParent(nullptr);
-		m_pThread->deleteLater();
-		m_pThread = nullptr;
 	}
 }
 
@@ -175,66 +173,26 @@ bool MCPServer::initServer(QSharedPointer<MCPToolsConfig> pToolsConfig,
                            QSharedPointer<MCPResourcesConfig> pResourcesConfig,
                            QSharedPointer<MCPPromptsConfig> pPromptsConfig)
 {
-	int nToolsApplied = 0;
-	int nResourcesApplied = 0;
-	int nPromptsApplied = 0;
-	
 	// 预先解析所有Handlers（一次性解析，避免重复遍历对象树）
-	QMap<QString, QObject*> dictHandlers = MCPHandlerResolver::resolveHandlers(qApp);
-	
+	QMap<QString, QObject*> dictHandlers = MCPHandlerResolver::resolveDefaultHandlers();
 	// 1. 应用工具配置
-	if (pToolsConfig)
+	if (pToolsConfig != nullptr)
 	{
 		for (const auto& toolConfig : pToolsConfig->getTools())
 		{
-			if (m_pToolService->addFromConfig(toolConfig, dictHandlers))
-			{
-				nToolsApplied++;
-			}
-			else
-			{
-				MCP_CORE_LOG_WARNING() << "MCPServer: 工具配置注册失败:" << toolConfig.strName;
-			}
-		}
-	}
-	
-	// 2. 应用资源配置
-	if (pResourcesConfig)
-	{
-		for (const auto& resourceConfig : pResourcesConfig->getResources())
-		{
-			if (m_pResourceService->addFromConfig(resourceConfig, dictHandlers))
-			{
-				nResourcesApplied++;
-			}
-			else
-			{
-				MCP_CORE_LOG_WARNING() << "MCPServer: 资源配置注册失败:" << resourceConfig.strUri;
-			}
+			m_pToolService->addFromConfig(toolConfig, dictHandlers);
 		}
 	}
 	
 	// 3. 应用提示词配置
-	if (pPromptsConfig)
+	if (pPromptsConfig != nullptr)
 	{
 		for (const auto& promptConfig : pPromptsConfig->getPrompts())
 		{
-			if (m_pPromptService->addFromConfig(promptConfig))
-			{
-				nPromptsApplied++;
-			}
-			else
-			{
-				MCP_CORE_LOG_WARNING() << "MCPServer: 提示词配置注册失败:" << promptConfig.strName;
-			}
+			m_pPromptService->addFromConfig(promptConfig);
 		}
 	}
-
-	MCP_CORE_LOG_INFO() << "MCPServer: 配置应用完成 - 工具:" << nToolsApplied
-						<< ", 资源:" << nResourcesApplied
-						<< ", 提示词:" << nPromptsApplied;
-
-	return (nToolsApplied + nResourcesApplied + nPromptsApplied) > 0;
+	return true;
 }
 
 void MCPServer::onThreadReady()

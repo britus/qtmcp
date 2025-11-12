@@ -41,7 +41,7 @@ public:
      * 
      * 支持的标识方式：
      * 1. 对象的objectName
-     * 2. 对象的"MPCServerHandlerName"属性（用于工具Handler）
+     * 2. 对象的"MPCToolHandlerName"属性（用于工具Handler）
      * 3. 对象的"MCPResourceHandlerName"属性（用于资源Handler）
      */
     static QMap<QString, QObject*> resolveHandlers(QObject* pSearchRoot = nullptr);
@@ -64,5 +64,20 @@ public:
      * @return Handler对象指针，未找到返回nullptr
      */
     static QObject* findHandler(const QString& strHandlerName, QObject* pSearchRoot = nullptr);
+    
+    /**
+     * @brief 从应用程序中查找所有默认Handler对象
+     * @return Handler名称到对象的映射表
+     * 
+     * 遍历范围：
+     * 1. qApp的所有子对象
+     * 2. 所有的QWidget对象
+     * 
+     * 支持的标识方式：
+     * 1. 对象的objectName
+     * 2. 对象的"MPCToolHandlerName"属性（用于工具Handler）
+     * 3. 对象的"MCPResourceHandlerName"属性（用于资源Handler）
+     */
+    static QMap<QString, QObject*> resolveDefaultHandlers();
 };
 

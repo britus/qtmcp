@@ -138,14 +138,7 @@ bool MCPResourceService::addFromJson(const QJsonObject& jsonResource, QObject* p
         // 将JSON对象转换为MCPResourceConfig
         MCPResourceConfig resourceConfig = MCPResourceConfig::fromJson(jsonResource);
         
-        // 如果提供了pSearchRoot，先解析handlers；否则传递空map，让addFromConfig从qApp搜索
-        QMap<QString, QObject*> dictHandlers;
-        if (pSearchRoot)
-        {
-            dictHandlers = MCPHandlerResolver::resolveHandlers(pSearchRoot);
-        }
-        
-        return addFromConfig(resourceConfig, dictHandlers);
+        return addFromConfig(resourceConfig, MCPHandlerResolver::resolveResourceHandlers(pSearchRoot));
     });
 }
 
@@ -201,16 +194,7 @@ bool MCPResourceService::addWrapperResourceFromConfig(const MCPResourceConfig& r
     }
     
     // 从dictHandlers映射表中查找Handler，如果dictHandlers为空则从qApp搜索
-    QObject* pHandler = nullptr;
-    if (!dictHandlers.isEmpty())
-    {
-        pHandler = dictHandlers.value(resourceConfig.strHandlerName, nullptr);
-    }
-    else
-    {
-        pHandler = MCPHandlerResolver::findHandler(resourceConfig.strHandlerName, nullptr);
-    }
-    
+    QObject* pHandler = dictHandlers.value(resourceConfig.strHandlerName, nullptr);
     if (pHandler == nullptr)
     {
         MCP_CORE_LOG_WARNING() << "MCPResourceService: 资源Handler未找到:" << resourceConfig.strHandlerName
