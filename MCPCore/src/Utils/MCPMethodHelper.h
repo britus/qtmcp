@@ -42,5 +42,8 @@ private:
 	static QSharedPointer<QList<QGenericArgument>> createMethodArguments(const QSharedPointer<QMetaMethod>& pMetaMethod, const QVariantList& lstArguments);
 	static QSharedPointer<QList<QGenericArgument>> createMethodArguments(const QSharedPointer<QMetaMethod>& pMetaMethod, const QVariantMap& dictArguments);
 	static QVariant directCallMethod(QObject* pHandler, const QSharedPointer<QMetaMethod>& pMetaMethod, const QSharedPointer<QList<QGenericArgument>>& pLstMethodArguments);
+private:
+	static bool customConvert(QVariant& inputArgument, int nMethodParameterType);
+
 };
 

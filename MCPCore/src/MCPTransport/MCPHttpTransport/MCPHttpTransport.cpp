@@ -104,9 +104,13 @@ void MCPHttpTransport::onDisconnected()
 {
     if (auto pConnection = qobject_cast<MCPHttpConnection*>(sender()))
     {
-        MCP_TRANSPORT_LOG_INFO() << "连接清理完成，ID:" << pConnection->getConnectionId();
-        m_dictConnections.remove(pConnection->getConnectionId());
+        quint64 nConnectionId = pConnection->getConnectionId();
+        MCP_TRANSPORT_LOG_INFO() << "连接清理完成，ID:" << nConnectionId;
+        m_dictConnections.remove(nConnectionId);
         m_pThreadPool->removeWorker(pConnection);
         pConnection->deleteLater();
+
+        // 发送连接断开信号
+        emit connectionDisconnected(nConnectionId);
     }
 }

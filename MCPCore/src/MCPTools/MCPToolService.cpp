@@ -78,6 +78,15 @@ bool MCPToolService::addFromJson(const QJsonObject& jsonTool, QObject* pSearchRo
     });
 }
 
+QJsonObject MCPToolService::call(const QString& strMethodName, const QJsonObject& jsonCallArguments)
+{
+	return MCPInvokeHelper::syncInvokeReturnT<QJsonObject>(this, [this, strMethodName, jsonCallArguments]() -> QJsonObject
+		{
+			// 将JSON对象转换为MCPToolConfig
+            return callTool(strMethodName, jsonCallArguments);
+		});
+}
+
 bool MCPToolService::addFromConfig(const MCPToolConfig& toolConfig, const QMap<QString, QObject*>& dictHandlers)
 {
     // 从dictHandlers映射表中查找Handler，如果dictHandlers为空则从qApp搜索

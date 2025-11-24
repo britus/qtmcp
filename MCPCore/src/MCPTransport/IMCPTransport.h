@@ -77,5 +77,11 @@ signals:
      * @param pMessage 消息对象指针
      */
     void messageReceived(quint64 nConnectionId, const QSharedPointer<MCPMessage>& pMessage);
+
+    /**
+     * @brief 连接断开信号
+     * @param nConnectionId 连接ID
+     */
+    void connectionDisconnected(quint64 nConnectionId);
 };
 

@@ -36,6 +36,7 @@ public:
     bool isRunning();
 signals:
     void messageReceived(quint64 nConnectionId, const QSharedPointer<MCPMessage>& pMessage);
+    void connectionDisconnected(quint64 nConnectionId);
     
 public slots:
     void sendMessage(quint64 nConnectionId, QSharedPointer<MCPMessage> pMessage);

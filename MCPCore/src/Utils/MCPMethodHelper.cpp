@@ -8,6 +8,11 @@
 
 #include "MCPMethodHelper.h"
 #include "MCPInvokeHelper.h"
+#include <QJsonValue>
+#include <QJsonObject>
+#include <QJsonArray>
+#include <QVariantList>
+#include <QVariantMap>
 #include <QDebug>
 #include <QThread>
 #include <QMetaMethod>
@@ -68,33 +73,40 @@ QVariant MCPMethodHelper::callMethod(QObject* pHandler, const QString& strMethod
 
 QSharedPointer<QList<QGenericArgument>> MCPMethodHelper::createMethodArguments(const QSharedPointer<QMetaMethod>& pMetaMethod, const QVariantList& lstArguments)
 {
-	//无法运行时获取默认值，所以严格相等
 	auto lstMethodParameterTypes = pMetaMethod->parameterTypes();
-	if (lstMethodParameterTypes.size() != lstArguments.size())
+	if (lstMethodParameterTypes.size() < lstArguments.size())
 	{
-		qDebug().noquote() << "MCPMethodHelper::createMethodArguments: " << lstArguments << " = false";
+		qDebug().noquote() << "MCPMethodHelper::createMethodArguments(arguments size error): " << lstArguments << " = false";
 		return QSharedPointer<QList<QGenericArgument>>();
 	}
 	QScopedPointer<QVariantList> pConvertedStorage(new QVariantList());
 	QScopedPointer<QList<QGenericArgument>> pLstMethodArguments(new QList<QGenericArgument>());
+	auto nInputCount = lstArguments.size();
 	for (int i = 0; i < lstMethodParameterTypes.size(); ++i)
 	{
-		pConvertedStorage->append(lstArguments[i]);
-		const auto& strParameterType = lstMethodParameterTypes[i];
-		auto nParameterType = QMetaType::type(strParameterType);
-
-		if (pConvertedStorage->last().userType() == nParameterType)
+		//
+		auto nMethodParameterType = QMetaType::type(lstMethodParameterTypes[i]);
+		//
+		pConvertedStorage->append((i < lstArguments.size()) ? lstArguments[i] : QVariant((QVariant::Type)nMethodParameterType));
+		auto& inputArgument = pConvertedStorage->last();
+		//
+		if (inputArgument.userType() == nMethodParameterType)
 		{
-			pLstMethodArguments->append(QGenericArgument(strParameterType, pConvertedStorage->last().constData()));
+			pLstMethodArguments->append(QGenericArgument(lstMethodParameterTypes[i], inputArgument.constData()));
 		}
-		else if (pConvertedStorage->last().canConvert(nParameterType))
+		else if (inputArgument.canConvert(nMethodParameterType))
 		{
-			pConvertedStorage->last().convert(nParameterType);
-			pLstMethodArguments->append(QGenericArgument(strParameterType, pConvertedStorage->last().constData()));
+			inputArgument.convert(nMethodParameterType);
+			pLstMethodArguments->append(QGenericArgument(lstMethodParameterTypes[i], inputArgument.constData()));
+		}
+		else if (customConvert(inputArgument, nMethodParameterType))
+		{
+			inputArgument.convert(nMethodParameterType);
+			pLstMethodArguments->append(QGenericArgument(lstMethodParameterTypes[i], inputArgument.constData()));
 		}
 		else
 		{
-			qDebug().noquote() << "MCPMethodHelper::createMethodArguments: " << lstArguments << " = false";
+			qDebug().noquote() << "MCPMethodHelper::createMethodArguments(arguments type error): " << lstMethodParameterTypes[i] << " = false";
 			return QSharedPointer<QList<QGenericArgument>>();
 		}
 	}
@@ -108,22 +120,25 @@ QSharedPointer<QList<QGenericArgument>> MCPMethodHelper::createMethodArguments(c
 
 QSharedPointer<QList<QGenericArgument>> MCPMethodHelper::createMethodArguments(const QSharedPointer<QMetaMethod>& pMetaMethod, const QVariantMap& dictArguments)
 {
-	//处理默认值算了，严格相等吧
 	auto lstMethodParameterNames = pMetaMethod->parameterNames();
-	if (dictArguments.size() != lstMethodParameterNames.size())
+	if (dictArguments.size() > lstMethodParameterNames.size())
 	{
-		qDebug().noquote() << "MCPMethodHelper::createMethodArguments: " << dictArguments.values() << " = false";
+		qDebug().noquote() << "MCPMethodHelper::createMethodArguments(arguments size error): " << dictArguments.values() << " = false";
 		return QSharedPointer<QList<QGenericArgument>>();
 	}
+	//
 	QVariantList lstArguments;
 	for (const auto& strMethodParameterName : lstMethodParameterNames)
 	{
 		auto it = dictArguments.find(strMethodParameterName);
-		if (it == dictArguments.end())
+		if (it != dictArguments.end())
 		{
-			return QSharedPointer<QList<QGenericArgument>>();
+			lstArguments.append(it.value());
 		}
-		lstArguments.append(it.value());
+	}
+	if (lstArguments.size() != dictArguments.size())
+	{
+		return QSharedPointer<QList<QGenericArgument>>();
 	}
 	return createMethodArguments(pMetaMethod, lstArguments);
 }
@@ -173,3 +188,38 @@ QVariant MCPMethodHelper::directCallMethod(QObject* pHandler, const QSharedPoint
 		<< "MCPMethodHelper::directCallMethod: " << pMetaMethod->name() << " = " << returnValue;
 	return returnValue;
 }
+
+bool MCPMethodHelper::customConvert(QVariant& inputArgument, int nMethodParameterType)
+{
+	// QVariantMap -> QJsonObject
+	if (inputArgument.userType() == QMetaType::QVariantMap)
+	{
+		if (nMethodParameterType == QMetaType::type("QJsonObject"))
+		{
+			inputArgument = QJsonObject::fromVariantMap(inputArgument.toMap());
+			return true;
+		}
+		if (nMethodParameterType == QMetaType::type("QJsonValue"))
+		{
+			inputArgument = QJsonValue(QJsonObject::fromVariantMap(inputArgument.toMap()));
+			return true;
+		}
+	}
+
+	// QVariantList -> QJsonArray
+	if (inputArgument.userType() == QMetaType::QVariantList)
+	{
+		if (nMethodParameterType == QMetaType::type("QJsonArray"))
+		{
+			inputArgument = QJsonArray::fromVariantList(inputArgument.toList());
+			return true;
+		}
+		if (nMethodParameterType == QMetaType::type("QJsonValue"))
+		{
+			inputArgument = QJsonValue(QJsonArray::fromVariantList(inputArgument.toList()));
+			return true;
+		}
+	}
+	return false;
+}
+

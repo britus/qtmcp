@@ -282,7 +282,7 @@ QString MCPTool::getName() const
 
 QJsonObject MCPTool::execute(const QJsonObject& jsonCallArguments)
 {
-	validateInput(jsonCallArguments);
+ 	validateInput(jsonCallArguments);
 	QJsonObject jsonObject =
 		(m_pExecHandler != nullptr)
 		? MCPMethodHelper::syncCallMethod(m_pExecHandler, m_strExecMethodName, jsonCallArguments.toVariantMap()).toJsonObject()

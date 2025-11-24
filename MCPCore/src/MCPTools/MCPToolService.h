@@ -59,10 +59,14 @@ public:
              std::function<QJsonObject()> execFun) override;
     
     bool remove(const QString& strName) override;
+
+public:
+	//
     QJsonArray list() const override;
-    
-    bool addFromJson(const QJsonObject& jsonTool, QObject* pSearchRoot = nullptr) override;
-    
+    //
+	bool addFromJson(const QJsonObject& jsonTool, QObject* pSearchRoot = nullptr) override;
+	//
+	QJsonObject call(const QString& strMethodName, const QJsonObject& jsonCallArguments);
 public:
     // 内部方法（供内部使用）
     bool registerTool(MCPTool* pTool, QObject* pExecHandler, const QString& strMethodName = QString());

@@ -17,6 +17,8 @@ MCPHttpTransportAdapter::MCPHttpTransportAdapter(QObject* pParent)
     // 转发信号：将内部对象的信号转发为接口的信号
     QObject::connect(m_pHttpTransport, &MCPHttpTransport::messageReceived,
                      this, &IMCPTransport::messageReceived);
+    QObject::connect(m_pHttpTransport, &MCPHttpTransport::connectionDisconnected,
+                     this, &IMCPTransport::connectionDisconnected);
 }
 
 MCPHttpTransportAdapter::~MCPHttpTransportAdapter()
